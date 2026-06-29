@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大學學測作文題庫系統｜明星高中</title>
+<style>
+  /* ─── Reset & Base ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:       #1a1a18;
+    --ink-2:     #4a4a46;
+    --ink-3:     #8a8a84;
+    --ink-4:     #b8b8b0;
+    --paper:     #f7f5f0;
+    --paper-2:   #ffffff;
+    --paper-3:   #ede9e0;
+    --rule:      rgba(0,0,0,0.10);
+    --rule-2:    rgba(0,0,0,0.18);
+    --red:       #c0392b;
+    --red-bg:    #fdf0ee;
+    --red-border:#e8c5c0;
+    --blue:      #1a56a0;
+    --blue-bg:   #edf2fa;
+    --blue-bdr:  #b8cfec;
+    --green:     #1a7a45;
+    --green-bg:  #edf7f1;
+    --amber:     #8a5e00;
+    --amber-bg:  #fdf6e3;
+    --amber-bdr: #e8d8a0;
+    --radius:    6px;
+    --r-card:    10px;
+    --shadow:    0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  html { font-size: 16px; scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Serif TC', 'Source Han Serif TC', '宋體', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.75;
+  }
+
+  /* ─── Layout ─── */
+  .app-shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+  header {
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--rule-2);
+    padding: 0 2rem;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 1rem; padding: 1rem 0; }
+
+  .school-mark {
+    width: 40px; height: 40px;
+    background: var(--red);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .school-mark svg { width: 22px; height: 22px; fill: #fff; }
+
+  .header-title h1 {
+    font-size: 17px; font-weight: 700; letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  .header-title p { font-size: 12px; color: var(--ink-3); font-family: sans-serif; margin-top: 1px; }
+
+  nav { display: flex; gap: 2px; }
+  nav button {
+    font-family: sans-serif;
+    font-size: 13px; font-weight: 500;
+    padding: 8px 14px; border: none;
+    background: none; cursor: pointer;
+    color: var(--ink-3); border-radius: var(--radius);
+    transition: all .15s; white-space: nowrap;
+  }
+  nav button:hover { color: var(--ink); background: var(--paper); }
+  nav button.active { color: var(--red); background: var(--red-bg); }
+
+  main { flex: 1; padding: 2rem; max-width: 960px; margin: 0 auto; width: 100%; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ─── Typography util ─── */
+  .sec-head {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+    color: var(--ink-3); text-transform: uppercase;
+    font-family: sans-serif;
+    margin: 2rem 0 0.75rem;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .sec-head:first-child { margin-top: 0; }
+  .sec-head svg { width: 14px; height: 14px; }
+
+  /* ─── Topic Cards ─── */
+  .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+
+  .topic-card {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    padding: 1.1rem 1.25rem;
+    cursor: pointer;
+    transition: all .15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .topic-card::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; background: var(--rule);
+    transition: background .15s;
+  }
+  .topic-card:hover { border-color: var(--rule-2); box-shadow: var(--shadow); }
+  .topic-card:hover::before { background: var(--ink-4); }
+  .topic-card.selected { border-color: var(--red-border); background: var(--red-bg); }
+  .topic-card.selected::before { background: var(--red); }
+
+  .tc-num {
+    font-family: sans-serif; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.1em; color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+  .tc-title { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+  .tc-sub { font-size: 12px; color: var(--ink-3); font-family: sans-serif; }
+
+  /* ─── Structure ─── */
+  .structure-wrap {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .structure-prompt {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--rule);
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--ink-2);
+    font-style: italic;
+    background: var(--amber-bg);
+  }
+  .struct-row {
+    display: flex; align-items: flex-start; gap: 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .struct-row:last-child { border-bottom: none; }
+  .struct-label {
+    font-family: sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.08em; color: var(--paper-2);
+    background: var(--ink);
+    padding: 0 14px;
+    min-width: 64px; text-align: center;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 52px; flex-shrink: 0;
+  }
+  .struct-content {
+    padding: 14px 1.25rem;
+    font-size: 14px; line-height: 1.8; color: var(--ink-2);
+    font-family: sans-serif;
+  }
+
+  /* ─── Quote List ─── */
+  .quote-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .quote-item:last-child { border-bottom: none; }
+  .qt-badge {
+    font-family: sans-serif; font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 3px; flex-shrink: 0;
+    margin-top: 3px;
+  }
+  .qt-text { font-size: 14px; line-height: 1.8; flex: 1; }
+  .qt-source { font-size: 12px; color: var(--ink-3); margin-left: 4px; font-family: sans-serif; }
+  .qt-del {
+    background: none; border: none; cursor: pointer;
+    color: var(--ink-4); padding: 4px; flex-shrink: 0;
+    border-radius: 4px; transition: all .12s;
+    font-size: 14px;
+  }
+  .qt-del:hover { color: var(--red); background: var(--red-bg); }
+
+  /* type colours */
+  .qt-開頭引用 { background: #e8f0fc; color: #1a56a0; }
+  .qt-論述佳句 { background: var(--green-bg); color: var(--green); }
+  .qt-轉折語   { background: var(--amber-bg); color: var(--amber); }
+  .qt-結尾昇華 { background: #f3eafa; color: #6b3fa0; }
+  .qt-名言     { background: #fdf0ee; color: var(--red); }
+  .qt-生動描寫 { background: #e8f7f2; color: #186b50; }
+
+  /* ─── Form styles ─── */
+  .form-card {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .form-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 1.25rem; color: var(--ink); }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field.full { grid-column: 1 / -1; }
+  .field label { font-family: sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.04em; }
+
+  select, input[type="text"], textarea {
+    font-family: sans-serif; font-size: 14px;
+    padding: 9px 12px;
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink);
+    width: 100%;
+    outline: none;
+    transition: border .12s;
+    resize: vertical;
+  }
+  select:focus, input:focus, textarea:focus {
+    border-color: var(--ink);
+    background: var(--paper-2);
+  }
+  textarea { min-height: 80px; }
+
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; }
+
+  button.btn {
+    font-family: sans-serif; font-size: 13px; font-weight: 600;
+    padding: 9px 18px; border-radius: var(--radius);
+    cursor: pointer; transition: all .12s; border: none;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  button.btn-primary { background: var(--ink); color: #fff; }
+  button.btn-primary:hover { background: #333; }
+  button.btn-secondary { background: var(--paper-2); color: var(--ink); border: 1px solid var(--rule-2); }
+  button.btn-secondary:hover { background: var(--paper); }
+  button.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
+  button.btn-danger:hover { background: #fde8e5; }
+
+  /* ─── Essay output ─── */
+  .essay-output {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .essay-output-head {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--rule);
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    background: var(--paper);
+  }
+  .essay-output-head h2 { font-size: 17px; font-weight: 700; }
+  .essay-meta { font-family: sans-serif; font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+  .essay-body { padding: 1.5rem 2rem; font-size: 15px; line-height: 2.1; white-space: pre-wrap; }
+
+  /* ─── Sample cards ─── */
+  .sample-card {
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-radius: var(--r-card);
+    overflow: hidden;
+    margin-bottom: 12px;
+    transition: box-shadow .15s;
+  }
+  .sample-card:hover { box-shadow: var(--shadow); }
+  .sample-head {
+    padding: 1rem 1.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: border-color .15s;
+  }
+  .sample-card.open .sample-head { border-bottom-color: var(--rule); }
+  .sample-head h3 { font-size: 16px; font-weight: 700; }
+  .sample-sub { font-family: sans-serif; font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+  .sample-num {
+    font-family: sans-serif; font-size: 11px; font-weight: 700;
+    background: var(--paper); border: 1px solid var(--rule);
+    padding: 3px 10px; border-radius: 3px; color: var(--ink-3);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .sample-body { display: none; padding: 1.5rem 2rem; font-size: 14px; line-height: 2.1; white-space: pre-wrap; }
+  .sample-card.open .sample-body { display: block; }
+  .toggle-icon { width: 18px; height: 18px; flex-shrink: 0; margin-left: 8px; color: var(--ink-3); transition: transform .2s; }
+  .sample-card.open .toggle-icon { transform: rotate(180deg); }
+
+  /* ─── Filter row ─── */
+  .filter-row { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; font-family: sans-serif; font-size: 13px; color: var(--ink-3); }
+  .filter-row select { width: auto; padding: 6px 10px; font-size: 13px; }
+
+  /* ─── Group heading in quotes ─── */
+  .group-head { font-family: sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink-3); text-transform: uppercase; padding: 0.5rem 0; margin-top: 1rem; border-bottom: 1px solid var(--rule); }
+  .group-head:first-child { margin-top: 0; }
+
+  /* ─── Loading ─── */
+  .loading { font-family: sans-serif; font-size: 14px; color: var(--ink-3); padding: 2rem; display: flex; align-items: center; gap: 10px; }
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--rule); border-top-color: var(--ink); border-radius: 50%; animation: spin .8s linear infinite; flex-shrink: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state { font-family: sans-serif; font-size: 14px; color: var(--ink-4); padding: 2rem; text-align: center; }
+
+  /* ─── Toast ─── */
+  #toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: #fff;
+    font-family: sans-serif; font-size: 13px;
+    padding: 10px 20px; border-radius: 20px;
+    opacity: 0; pointer-events: none;
+    transition: all .25s; z-index: 9999;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ─── AI Badge ─── */
+  .ai-badge { font-family: sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; background: var(--ink); color: #fff; padding: 3px 8px; border-radius: 3px; }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 700px) {
+    main { padding: 1rem; }
+    header { padding: 0 1rem; flex-wrap: wrap; }
+    nav { overflow-x: auto; width: 100%; border-top: 1px solid var(--rule); padding: 6px 0; }
+    .essay-body { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <header>
+    <div class="header-left">
+      <div class="school-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="header-title">
+        <h1>大學學測作文題庫系統</h1>
+        <p>明星高中 · 可離線使用</p>
+      </div>
+    </div>
+    <nav role="navigation" aria-label="功能導覽">
+      <button class="active" onclick="switchTab('topics')" id="tab-topics">題目與架構</button>
+      <button onclick="switchTab('quotes')" id="tab-quotes">佳句題庫</button>
+      <button onclick="switchTab('generate')" id="tab-generate">AI 生成作文</button>
+      <button onclick="switchTab('samples')" id="tab-samples">範本庫</button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ══════════════════ PANEL 1: 題目與架構 ══════════════════ -->
+    <section class="panel active" id="panel-topics" aria-labelledby="tab-topics">
+      <div class="sec-head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        五大作文題目
+      </div>
+      <div class="topic-grid" id="topicGrid"></div>
+      <div id="structurePanel"></div>
+    </section>
+
+    <!-- ══════════════════ PANEL 2: 佳句題庫 ══════════════════ -->
+    <section class="panel" id="panel-quotes" aria-labelledby="tab-quotes">
+      <div class="form-card">
+        <h3>新增佳句</h3>
+        <div class="form-grid">
+          <div class="field">
+            <label>所屬題目</label>
+            <select id="quoteTopicSel"></select>
+          </div>
+          <div class="field">
+            <label>佳句類別</label>
+            <select id="quoteType">
+              <option>開頭引用</option>
+              <option>論述佳句</option>
+              <option>轉折語</option>
+              <option>結尾昇華</option>
+              <option>名言</option>
+              <option>生動描寫</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>佳句內容</label>
+            <textarea id="quoteText" placeholder="輸入佳句、名言或警句…"></textarea>
+          </div>
+          <div class="field full">
+            <label>出處（選填）</label>
+            <input type="text" id="quoteSource" placeholder="例：《論語》、余光中、自創">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="addQuote()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            新增佳句
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <span>篩選題目：</span>
+        <select id="quoteFilterSel" onchange="renderQuotes()"></select>
+        <span id="quoteCount" style="color:var(--ink-3)"></span>
+      </div>
+      <div id="quotesList"></div>
+    </section>
+
+    <!-- ══════════════════ PANEL 3: AI 生成作文 ══════════════════ -->
+    <section class="panel" id="panel-generate" aria-labelledby="tab-generate">
+      <div class="form-card">
+        <h3>生成設定</h3>
+        <div class="form-grid">
+          <div class="field">
+            <label>選擇作文題目</label>
+            <select id="genTopicSel" onchange="updateQuotePreview()"></select>
+          </div>
+          <div class="field">
+            <label>字數要求</label>
+            <select id="genWordCount">
+              <option value="400">約 400 字（短文）</option>
+              <option value="600" selected>約 600 字（標準）</option>
+              <option value="800">約 800 字（長文）</option>
+            </select>
+          </div>
+          <div class="field full">
+            <label>個人素材或想法（選填，AI 會融入）</label>
+            <textarea id="genUserInput" placeholder="例：我曾在家人生病時深刻感受到陪伴的力量…"></textarea>
+          </div>
+        </div>
+        <div id="quotePreview"></div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="generateEssay()" id="genBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            AI 生成作文
+          </button>
+          <span style="font-family:sans-serif;font-size:12px;color:var(--ink-3);align-self:center;">需要網路連線</span>
+        </div>
+      </div>
+      <div id="generatedEssay"></div>
+    </section>
+
+    <!-- ══════════════════ PANEL 4: 範本庫 ══════════════════ -->
+    <section class="panel" id="panel-samples" aria-labelledby="tab-samples">
+      <div class="sec-head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        五篇完整範本作文
+      </div>
+      <div id="samplesGrid"></div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ──────────────────────────────────────────
+//  DATA
+// ──────────────────────────────────────────
+const TOPICS = [
+  {
+    id: 1, title: "逆境中的成長", subtitle: "韌性、挫折與自我超越",
+    prompt: "「人生不如意事，十常八九。」請以「逆境中的成長」為題，寫一篇文章，論述挫折與困境對個人成長的意義。",
+    structure: [
+      { label: "破題", content: "以名言、情境或反問開頭，引出「逆境」的定義，點明挫折並非終點，而是轉機。" },
+      { label: "起段", content: "描述具體情境或個人／社會案例，說明逆境的樣貌（失敗、病痛、誤解、失去）。" },
+      { label: "正論", content: "論述逆境如何磨礪意志、培養韌性、發現潛能。可舉名人事例佐證（如海倫凱勒、史蒂芬霍金）。" },
+      { label: "深化", content: "探討逆境的辯證性：並非所有逆境都能自動轉化，關鍵在於「態度」與「行動」的選擇。" },
+      { label: "結尾", content: "昇華主旨，呼應開頭，表達對逆境的正向詮釋，留下深刻省思。" }
+    ]
+  },
+  {
+    id: 2, title: "科技與人性", subtitle: "數位時代的連結與疏離",
+    prompt: "科技日新月異，智慧型手機、社群媒體改變了人與人之間的關係。請以「科技與人性」為題，探討科技發展對人際關係與人文精神的影響。",
+    structure: [
+      { label: "破題", content: "以鮮明的對比畫面開頭，例如：一桌人各滑手機，卻無人對話——引發讀者思考科技的兩面性。" },
+      { label: "起段", content: "說明科技帶來的便利：即時通訊、資訊取得、跨越地域的連結。" },
+      { label: "轉折", content: "指出科技的隱憂：注意力碎片化、情感膚淺化、「網路霸凌」等現象，人與人之間的真實感逐漸消失。" },
+      { label: "深化", content: "論述科技本身無善惡，關鍵在於「使用者的主體性」——如何主動選擇，而非被科技驅動。" },
+      { label: "結尾", content: "呼籲在便利與人情之間找到平衡，讓科技成為連結人心的橋梁，而非阻隔情感的高牆。" }
+    ]
+  },
+  {
+    id: 3, title: "家的意義", subtitle: "歸屬感、愛與責任",
+    prompt: "「家」是每個人生命中最初的場所，也是最深的羈絆。請以「家的意義」為題，探討「家」在現代社會中承載的情感與價值。",
+    structure: [
+      { label: "破題", content: "以感性的具體畫面帶入：一頓家常飯、一盞夜燈——讓讀者立刻感受「家」的溫度。" },
+      { label: "起段", content: "定義「家」的多元面向：不只是建築，而是情感的載體——有愛、有衝突、有包容。" },
+      { label: "正論", content: "論述家的三個核心意義：歸屬感（有人等待你）、安全感（可以卸下防備）、認同感（被無條件接受）。" },
+      { label: "深化", content: "反思現代家庭困境：雙薪家庭、隔代教養、異鄉遊子——家的形式改變，但對家的渴望不變。" },
+      { label: "結尾", content: "昇華為「家不是一個地方，而是一種感受」，呼籲珍視身邊的人，共同建構有溫度的家。" }
+    ]
+  },
+  {
+    id: 4, title: "環境與責任", subtitle: "人與自然的共存課題",
+    prompt: "氣候變遷、生態破壞已成為全球共同的危機。請以「環境與責任」為題，論述個人與社會對環境保護應有的態度與行動。",
+    structure: [
+      { label: "破題", content: "以震撼的環境現象開場：北極熊站在融冰上、珊瑚礁的白化、極端氣候——製造緊迫感。" },
+      { label: "起段", content: "說明人類活動與環境惡化的關聯，從工業革命到過度消費的歷史脈絡。" },
+      { label: "正論", content: "論述三個層次的責任：個人（減塑、節能）、企業（ESG）、政府（政策立法）——環保是系統性工程。" },
+      { label: "深化", content: "探討「便利與永續」的矛盾，以及世代公平的倫理：我們是在向子孫借用地球。" },
+      { label: "結尾", content: "以「我們不是地球的主人，而是地球的守護者」作結，呼籲集體行動，留下美麗的地球。" }
+    ]
+  },
+  {
+    id: 5, title: "閱讀的力量", subtitle: "知識、想像力與自我啟蒙",
+    prompt: "在資訊爆炸的時代，閱讀的方式與意義不斷改變。請以「閱讀的力量」為題，論述閱讀對個人成長與社會發展的重要性。",
+    structure: [
+      { label: "破題", content: "以「一本書改變了我」的情感鉤開頭，或以「當我們停止閱讀，我們停止了什麼？」的反問引思考。" },
+      { label: "起段", content: "說明閱讀的多元形式：紙本書、電子書、有聲書——閱讀的本質是「讓文字進入思想」。" },
+      { label: "正論", content: "論述閱讀的三大力量：認知力（知識積累）、同理心（進入他人的世界）、批判力（獨立思考）。" },
+      { label: "深化", content: "對比「資訊消費」與「深度閱讀」的差異——刷短影音給予刺激，閱讀給予沉澱與思考的空間。" },
+      { label: "結尾", content: "以閱讀作為「與古人對話、與世界連結、與自己相遇」的方式作結，呼籲在喧囂中找回閱讀的寧靜。" }
+    ]
+  }
+];
+
+let quotes = [
+  { id:1, topicId:1, type:"名言",     text:"艱難困苦，玉汝於成。",                                      source:"《易經》" },
+  { id:2, topicId:1, type:"開頭引用", text:"每一次跌倒，都是大地對你的一次提醒：站起來，繼續走。",      source:"自創" },
+  { id:3, topicId:1, type:"結尾昇華", text:"我們不是因為看到希望才堅持，而是因為堅持才看到希望。",      source:"改自西班牙諺語" },
+  { id:4, topicId:1, type:"論述佳句", text:"寶劍鋒從磨礪出，梅花香自苦寒來。",                          source:"古諺" },
+  { id:5, topicId:2, type:"論述佳句", text:"科技是人類延伸的手，卻不應成為代替心靈感受的牆。",          source:"自創" },
+  { id:6, topicId:2, type:"名言",     text:"技術的進步不應取代人與人之間真實的連結。",                  source:"改自麥克魯漢" },
+  { id:7, topicId:2, type:"轉折語",   text:"然而，廣不等於深，快不等於真——科技讓我們在線，卻不一定讓我們在場。", source:"自創" },
+  { id:8, topicId:3, type:"開頭引用", text:"家，是你不論離開多遠，終究要回來的地方。",                  source:"改自 T.S. 艾略特" },
+  { id:9, topicId:3, type:"生動描寫", text:"那一碗熱騰騰的湯，比任何語言都更能說清楚「歡迎回來」的意思。", source:"自創" },
+  { id:10,topicId:4, type:"名言",     text:"我們不是繼承了父輩的地球，而是向子孫借用了它。",            source:"印地安諺語" },
+  { id:11,topicId:4, type:"結尾昇華", text:"地球不需要我們拯救，是我們需要地球才能生存——保護環境，是保護我們自己。", source:"自創" },
+  { id:12,topicId:5, type:"名言",     text:"讀一本好書，就是和許多高尚的人說話。",                      source:"歌德" },
+  { id:13,topicId:5, type:"論述佳句", text:"閱讀讓我們在別人的故事中，找到了自己的答案。",              source:"自創" },
+  { id:14,topicId:5, type:"開頭引用", text:"當我們停止閱讀，我們停止了獨立思考的練習，也停止了與文明的對話。", source:"自創" },
+];
+let qId = 15;
+
+const SAMPLES = [
+  {
+    topicId:1, title:"逆境中的成長",
+    body:`「艱難困苦，玉汝於成。」古人以此銘誌生命的真理，而我們每個人，也都是在無數次的跌倒與爬起之間，刻出了自己獨特的輪廓。
+
+  逆境的面貌千變萬化——或是一次慘敗的考試成績，或是一段難以釋懷的誤解，或是一場突如其來的失去。它們共同的語言，是讓人窒息的無力感。然而，就在那窒息的片刻，成長悄悄地開始了。
+
+  以海倫凱勒為例，一個生命初始便失去視覺與聽覺的女孩，面對的是幾乎無法想像的黑暗與寂靜。但在莎莉文老師的引導下，她選擇以指尖觸摸世界，以意志對抗命運。她後來說，儘管世界充滿苦難，也充滿了克服苦難的力量。逆境沒有打倒她，反而成為她鑄就精神高度的熔爐。
+
+  然而，我們也必須正視一個現實：並非所有逆境都能自動化為成長的養分。關鍵不在於逆境本身的輕重，而在於面對逆境時，我們選擇的態度與行動。一個人可以在挫折中沉淪，也可以在同樣的挫折中掙扎出新的方向。成長從不是逆境的禮物，而是一種主動的選擇。
+
+  每一次跌倒，都是大地對你的一次提醒：站起來，繼續走。我們不是因為看到希望才堅持，而是因為堅持才看到希望。在那條佈滿荊棘的路上，每一道傷口都是曾經勇敢的印記，每一滴汗水都是蛻變的見證。
+
+  逆境是生命的試煉，更是靈魂的雕刻師。它以粗礪的雙手，在我們身上留下了刻痕，也刻出了那個更堅強、更深刻、更真實的我們。`
+  },
+  {
+    topicId:2, title:"科技與人性",
+    body:`一張餐桌，六個人，六支手機。菜香四溢，卻無人舉箸交談。這樣的畫面，在當代社會早已司空見慣，卻也讓人不禁停下來思考：科技究竟在拉近我們，還是在我們之間悄悄築起了一道透明的牆？
+
+  毋庸置疑，科技帶來了前所未有的便利。視訊通話讓遠隔重洋的家人得以面對面，社群媒體讓素昧平生的人們因共同興趣而相聚，即時訊息消弭了時間與空間的距離。科技，確實讓我們的連結更廣、更快、更多。
+
+  然而，廣不等於深，快不等於真。當我們沉浸於螢幕的藍光之中，注意力被演算法精準切割成碎片，情感交流逐漸被貼圖與按讚所取代，真實的眼神接觸、沉默中的陪伴、無所事事的閒聊——這些曾經構成人際溫度的細節，正在慢慢消失。科技讓我們「在線」，卻不一定讓我們「在場」。
+
+  科技本身無善惡，正如刀可以是炊具，也可以是凶器。問題的核心，在於使用者的主體性——我們是在主動選擇科技，還是在被科技選擇？當我們有意識地放下手機，專注於眼前的人，科技便退回工具的位置；當我們無意識地滑動螢幕，科技便悄然成了主人。
+
+  科技是人類延伸的手，卻不應成為代替心靈感受的牆。在這個資訊過載的時代，真正珍貴的，不是連線速度，而是那個真實、緩慢、有溫度的「在一起」。讓科技服務人性，而不是讓人性遷就科技——這才是數位時代最重要的課題。`
+  },
+  {
+    topicId:3, title:"家的意義",
+    body:`深夜回家，走廊盡頭的那一盞燈還亮著。不必解釋去了哪裡、做了什麼，只是那一束光，已讓所有的疲憊有了去處。「家」，從來不只是一個地址，而是一個讓人願意回去的理由。
+
+  「家」的意義，在每個人心中有著不同的形狀。它可能是母親在廚房裡忙碌的背影，是父親睡著時掉落的眼鏡，是兄弟姐妹吵架後和好的第一句話。家不是完美的，家是真實的——有歡笑，有爭執，有說不清楚卻深入骨髓的羈絆。
+
+  家給予我們三種最根本的精神滋養：其一是歸屬感，那種「有人在等你」的確幸；其二是安全感，那種不必表演、不必偽裝、可以徹底卸下防備的自由；其三是認同感，那種「不論你變成什麼樣，這裡都接受你」的無條件。這三者，是現代人在外面世界打拚時，最重要的底氣來源。
+
+  然而，現代社會的家庭面貌正在改變。雙薪家庭、隔代教養、長年異地工作的遊子，讓「家人在一起」這件事變得愈來愈奢侈。但無論形式如何改變，人們對「家」的渴望從未消失——那一碗熱騰騰的湯，比任何語言都更能說清楚「歡迎回來」的意思。
+
+  家，不是一個地方，而是一種感受。那個讓你願意撐過所有艱難、只為回去的感受。珍惜那盞等著你的燈，珍惜那個願意等你的人——因為，那就是家。`
+  },
+  {
+    topicId:4, title:"環境與責任",
+    body:`北極熊站在一塊漂流的浮冰上，四周是茫茫的海水。那一幕照片，震撼了全世界，也讓我們不得不正視一個無法迴避的事實：我們正在失去我們的地球。
+
+  氣候變遷、生態浩劫，從來不是遙遠的新聞，而是我們每一個人生活方式累積的後果。自工業革命以來，人類以前所未有的速度索取自然的資源，排放溫室氣體，砍伐森林，污染海洋。大自然以其緩慢而確定的方式回應：極端氣候、物種滅絕、海平面上升——這是地球對人類的帳單。
+
+  面對這份帳單，責任由誰承擔？答案是：每一個人，每一個層次。個人的責任，是從日常生活做起——減少一次性塑膠、節約用水用電、選擇永續的消費方式。企業的責任，是將環境成本納入商業決策，推動 ESG，以長遠的眼光取代短視的利潤。政府的責任，是制定強而有力的環保政策，讓環境保護有法可依、有制度可循。
+
+  我們往往以「方便」作為傷害環境的藉口，卻忘了：我們不是在擁有地球，我們是向子孫借用了它。每一個被我們遺棄的塑膠袋，每一噸排放到大氣的廢氣，都是我們留給下一代的債。
+
+  地球不需要我們拯救，是我們需要地球才能生存。保護環境，不是浪漫主義的情懷，而是最務實的自我保護。我們不是地球的主人，而是地球的守護者——這個身份，是義務，也是榮耀。`
+  },
+  {
+    topicId:5, title:"閱讀的力量",
+    body:`那一年，我在圖書館的角落讀到一本書，書裡的主角面對著與我幾乎相同的困境，卻以截然不同的方式走了出來。那一刻，我第一次明白：原來閱讀，不只是接收文字，而是在別人的故事中，找到了自己的答案。
+
+  閱讀的形式在改變——從竹簡到紙頁，從紙頁到螢幕，從文字到有聲。但閱讀的本質從未改變：讓文字進入思想，讓思想改變自己。讀一本好書，就是和許多高尚的人說話。歌德的這句話，道盡了閱讀最深層的魅力。
+
+  閱讀給予我們三種力量。第一是認知力——書本是人類數千年智慧的結晶，閱讀讓我們站在巨人的肩膀上，以更廣闊的視角理解世界。第二是同理心——當我們進入哈姆雷特的糾結、簡愛的倔強、或是一個陌生異鄉人的孤獨，我們練習了理解「他者」的能力，而這正是文明最需要的素養。第三是批判力——一本書提供了一種觀點，多本書提供了多種觀點，真正的閱讀者，懂得在眾多觀點之間進行思辨，形成自己的判斷。
+
+  然而，「資訊消費」與「深度閱讀」是截然不同的事。刷短影音帶來的是刺激與遺忘，深度閱讀帶來的是沉澱與內化。在演算法精心設計的資訊洪流中，閱讀是少數能讓我們停下來思考的行為。
+
+  閱讀是與古人對話、與世界連結、與自己相遇的方式。在這個喧囂而浮躁的時代，請保留一點時間，打開一本書，讓文字帶你去那個安靜的、深邃的、屬於自己的內在世界。`
+  }
+];
+
+// ──────────────────────────────────────────
+//  STATE & PERSISTENCE
+// ──────────────────────────────────────────
+function saveQuotes() {
+  try { localStorage.setItem('essay_quotes', JSON.stringify(quotes)); } catch(e) {}
+}
+function loadQuotes() {
+  try {
+    const saved = localStorage.getItem('essay_quotes');
+    if (saved) { quotes = JSON.parse(saved); qId = Math.max(...quotes.map(q=>q.id)) + 1; }
+  } catch(e) {}
+}
+
+// ──────────────────────────────────────────
+//  INIT
+// ──────────────────────────────────────────
+let selectedTopicId = null;
+
+function init() {
+  loadQuotes();
+  populateSelects();
+  renderTopics();
+  renderQuotes();
+  renderSamples();
+  updateQuotePreview();
+}
+
+// ──────────────────────────────────────────
+//  TABS
+// ──────────────────────────────────────────
+function switchTab(name) {
+  ['topics','quotes','generate','samples'].forEach(n => {
+    document.getElementById('tab-'+n).classList.toggle('active', n===name);
+    document.getElementById('panel-'+n).classList.toggle('active', n===name);
+  });
+}
+
+// ──────────────────────────────────────────
+//  SELECTS
+// ──────────────────────────────────────────
+function populateSelects() {
+  const opts = TOPICS.map(t=>`<option value="${t.id}">題目${t.id}：${t.title}</option>`).join('');
+  document.getElementById('quoteTopicSel').innerHTML  = opts;
+  document.getElementById('genTopicSel').innerHTML    = opts;
+  document.getElementById('quoteFilterSel').innerHTML = `<option value="all">全部題目</option>` + opts;
+}
+
+// ──────────────────────────────────────────
+//  PANEL 1 – TOPICS
+// ──────────────────────────────────────────
+function renderTopics() {
+  document.getElementById('topicGrid').innerHTML = TOPICS.map(t => `
+    <div class="topic-card ${selectedTopicId===t.id?'selected':''}" onclick="selectTopic(${t.id})" role="button" tabindex="0" aria-pressed="${selectedTopicId===t.id}" onkeydown="if(event.key==='Enter')selectTopic(${t.id})">
+      <div class="tc-num">題目 ${t.id}</div>
+      <div class="tc-title">${t.title}</div>
+      <div class="tc-sub">${t.subtitle}</div>
+    </div>`).join('');
+}
+
+function selectTopic(id) {
+  selectedTopicId = id;
+  renderTopics();
+  renderStructure();
+}
+
+function renderStructure() {
+  const panel = document.getElementById('structurePanel');
+  if (!selectedTopicId) { panel.innerHTML=''; return; }
+  const t = TOPICS.find(x=>x.id===selectedTopicId);
+  const qs = quotes.filter(q=>q.topicId===selectedTopicId);
+  panel.innerHTML = `
+    <div class="sec-head" style="margin-top:2rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      作文題目
+    </div>
+    <div class="structure-wrap">
+      <div class="structure-prompt">${t.prompt}</div>
+    </div>
+    <div class="sec-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      五段式寫作架構
+    </div>
+    <div class="structure-wrap">
+      ${t.structure.map(s=>`
+        <div class="struct-row">
+          <div class="struct-label">${s.label}</div>
+          <div class="struct-content">${s.content}</div>
+        </div>`).join('')}
+    </div>
+    <div class="sec-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/></svg>
+      可用佳句（${qs.length} 則）
+    </div>
+    <div class="structure-wrap" style="padding:0.25rem 1.5rem;">
+      ${qs.length ? qs.map(renderQuoteItem).join('') : '<div class="empty-state">尚無佳句——請至「佳句題庫」新增</div>'}
+    </div>
+  `;
+}
+
+// ──────────────────────────────────────────
+//  PANEL 2 – QUOTES
+// ──────────────────────────────────────────
+function renderQuoteItem(q, showDel=true) {
+  const cls = `qt-${q.type}`;
+  return `
+    <div class="quote-item">
+      <span class="qt-badge ${cls}">${q.type}</span>
+      <span class="qt-text">「${q.text}」${q.source?`<span class="qt-source">——${q.source}</span>`:''}</span>
+      ${showDel?`<button class="qt-del" onclick="deleteQuote(${q.id})" aria-label="刪除此佳句" title="刪除">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+      </button>`:''}
+    </div>`;
+}
+
+function renderQuotes() {
+  const filter = document.getElementById('quoteFilterSel').value;
+  const filtered = filter==='all' ? quotes : quotes.filter(q=>q.topicId===parseInt(filter));
+  const container = document.getElementById('quotesList');
+  document.getElementById('quoteCount').textContent = `共 ${filtered.length} 則`;
+
+  if (!filtered.length) { container.innerHTML = '<div class="empty-state">尚無佳句，請使用上方表單新增</div>'; return; }
+
+  const grouped = {};
+  filtered.forEach(q => {
+    const t = TOPICS.find(x=>x.id===q.topicId);
+    const key = t ? `題目 ${t.id}：${t.title}` : '未分類';
+    if (!grouped[key]) grouped[key]=[];
+    grouped[key].push(q);
+  });
+
+  container.innerHTML = Object.entries(grouped).map(([title,qs])=>`
+    <div class="group-head">${title}</div>
+    <div class="structure-wrap" style="padding:0.25rem 1.5rem;margin-bottom:1rem;">
+      ${qs.map(q=>renderQuoteItem(q,true)).join('')}
+    </div>`).join('');
+}
+
+function addQuote() {
+  const text = document.getElementById('quoteText').value.trim();
+  if (!text) { showToast('請輸入佳句內容'); return; }
+  quotes.push({
+    id: qId++,
+    topicId: parseInt(document.getElementById('quoteTopicSel').value),
+    type: document.getElementById('quoteType').value,
+    text,
+    source: document.getElementById('quoteSource').value.trim()
+  });
+  saveQuotes();
+  document.getElementById('quoteText').value = '';
+  document.getElementById('quoteSource').value = '';
+  renderQuotes();
+  if (selectedTopicId) renderStructure();
+  showToast('佳句已新增並儲存');
+}
+
+function deleteQuote(id) {
+  if (!confirm('確定要刪除這則佳句？')) return;
+  quotes = quotes.filter(q=>q.id!==id);
+  saveQuotes();
+  renderQuotes();
+  if (selectedTopicId) renderStructure();
+  showToast('已刪除');
+}
+
+// ──────────────────────────────────────────
+//  PANEL 3 – GENERATE
+// ──────────────────────────────────────────
+function updateQuotePreview() {
+  const topicId = parseInt(document.getElementById('genTopicSel').value);
+  const qs = quotes.filter(q=>q.topicId===topicId);
+  const el = document.getElementById('quotePreview');
+  if (!qs.length) { el.innerHTML=''; return; }
+  el.innerHTML = `
+    <div style="margin:0.75rem 0;padding:0.75rem 1rem;background:var(--amber-bg);border:1px solid var(--amber-bdr);border-radius:var(--radius);">
+      <div style="font-family:sans-serif;font-size:11px;font-weight:700;letter-spacing:0.08em;color:var(--amber);margin-bottom:6px;">AI 將融入以下 ${qs.length} 則佳句</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;">${qs.map(q=>`<span style="font-family:sans-serif;font-size:11px;background:rgba(0,0,0,0.06);padding:2px 8px;border-radius:3px;">${q.type}：${q.text.slice(0,18)}${q.text.length>18?'…':''}</span>`).join('')}</div>
+    </div>`;
+}
+
+async function generateEssay() {
+  const topicId  = parseInt(document.getElementById('genTopicSel').value);
+  const topic    = TOPICS.find(t=>t.id===topicId);
+  const wordCount= document.getElementById('genWordCount').value;
+  const userInput= document.getElementById('genUserInput').value.trim();
+  const qs       = quotes.filter(q=>q.topicId===topicId);
+  const btn      = document.getElementById('genBtn');
+
+  const container = document.getElementById('generatedEssay');
+  container.innerHTML = `<div class="loading"><div class="spinner"></div>AI 正在生成作文，請稍候…</div>`;
+  btn.disabled = true;
+
+  const quotesStr = qs.length
+    ? qs.map(q=>`【${q.type}】「${q.text}」${q.source?`——${q.source}`:''}`).join('\n')
+    : '（無預設佳句）';
+
+  const structStr = topic.structure.map(s=>`[${s.label}] ${s.content}`).join('\n');
+
+  const prompt = `你是一位頂尖高中國文老師，請根據以下資訊，生成一篇優質的大學學測作文範文。
+
+作文題目：${topic.title}
+題目說明：${topic.prompt}
+
+寫作架構指引：
+${structStr}
+
+可參考的佳句題庫：
+${quotesStr}
+${userInput?`\n學生個人素材或想法（請融入文章）：\n${userInput}\n`:''}
+要求：
+- 字數約 ${wordCount} 字
+- 文筆典雅，論述有力
+- 自然融入至少 2–3 則佳句
+- 段落分明，符合五段架構
+- 開頭要有吸引力，結尾要有昇華感
+- 以繁體中文書寫
+- 直接輸出作文內容，不需要標題或前言`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1500, messages:[{role:'user',content:prompt}] })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const text = (data.content||[]).map(c=>c.text||'').join('') || '生成失敗，請重試。';
+
+    container.innerHTML = `
+      <div class="essay-output">
+        <div class="essay-output-head">
+          <div>
+            <h2>${topic.title}</h2>
+            <div class="essay-meta">AI 生成 · 約 ${wordCount} 字 · 參考 ${qs.length} 則佳句</div>
+          </div>
+          <span class="ai-badge">AI</span>
+        </div>
+        <div class="essay-body" id="aiEssayText">${escHtml(text)}</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="copyEssay()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          複製作文
+        </button>
+        <button class="btn btn-secondary" onclick="printEssay()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          列印
+        </button>
+      </div>`;
+  } catch(e) {
+    container.innerHTML = `<div style="font-family:sans-serif;font-size:14px;color:var(--red);padding:1.5rem;background:var(--red-bg);border:1px solid var(--red-border);border-radius:var(--r-card);">生成失敗：${e.message}<br><small style="color:var(--ink-3)">請確認網路連線，AI 生成功能需要網路。</small></div>`;
+  } finally { btn.disabled = false; }
+}
+
+function copyEssay() {
+  const el = document.getElementById('aiEssayText');
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText).then(()=>showToast('作文已複製到剪貼簿'));
+}
+
+function printEssay() { window.print(); }
+
+// ──────────────────────────────────────────
+//  PANEL 4 – SAMPLES
+// ──────────────────────────────────────────
+let openSample = null;
+
+function renderSamples() {
+  document.getElementById('samplesGrid').innerHTML = SAMPLES.map((s,i)=>{
+    const t = TOPICS.find(x=>x.id===s.topicId);
+    return `
+      <div class="sample-card" id="sCard${i}">
+        <div class="sample-head" onclick="toggleSample(${i})" role="button" tabindex="0" aria-expanded="false" onkeydown="if(event.key==='Enter')toggleSample(${i})">
+          <div>
+            <h3>${s.title}</h3>
+            <div class="sample-sub">${t?.subtitle||''}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="sample-num">範本 ${i+1}</span>
+            <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <div class="sample-body">${escHtml(s.body)}</div>
+      </div>`;
+  }).join('');
+}
+
+function toggleSample(i) {
+  const card = document.getElementById('sCard'+i);
+  const isOpen = card.classList.contains('open');
+  document.querySelectorAll('.sample-card').forEach(c=>c.classList.remove('open'));
+  if (!isOpen) card.classList.add('open');
+}
+
+// ──────────────────────────────────────────
+//  UTILS
+// ──────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 2200);
+}
+
+// ──────────────────────────────────────────
+//  BOOT
+// ──────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
